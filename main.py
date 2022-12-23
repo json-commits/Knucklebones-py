@@ -13,30 +13,50 @@ class Game:
         self.board_list = [copy.deepcopy(board_template), copy.deepcopy(board_template)]
 
         self.turn = 0
-        self.player1_score = 0
-        self.player2_score = 0
+        self.player_scores = [0, 0]
 
     def resolve_board(self):
-        # sum all columns
-        # check if board is full
-        # -if full, check who has the highest score
+        # move all 0s to the top of the board
+        for i, board in enumerate(self.board_list):
+            for j, _ in enumerate(board):
+                zeros = board[j].count(0)
 
-        pass
+                for _ in range(zeros):
+                    self.board_list[i][j].remove(0)
+
+                for _ in range(zeros):
+                    self.board_list[i][j].insert(0, 0)
+
+        # sum all columns
+        self.player_scores = [0, 0]
+        for index, board in enumerate(self.board_list):
+            for column in board:
+                # frequency of each number in column
+                column_frequency = [column.count(i) for i in range(1, 7)]
+                for i, frequency in enumerate(column_frequency):
+                    self.player_scores[index] += (i + 1) * pow(frequency, 2)
+
+        # check if board is full
+        self.game_ongoing = False
+        for board in self.board_list:
+            for column in board:
+                if 0 in column:
+                    self.game_ongoing = True
 
     def print_board(self):
         # loop through board_list
-        for board in self.board_list:
+        for i, board in enumerate(self.board_list):
             # transpose board to a list of rows
             transposed_board = list(map(list, zip(*board)))
 
-            print('---------1')
+            print(f'p{i + 1}-------')
             for row in transposed_board:
                 print(row)
-        print('---------2')
+        print('---------')
 
         # print scores
-        print(f"Player 1 score: {self.player1_score} \n"
-              f"Player 2 score: {self.player2_score}")
+        print(f"Player 1 score: {self.player_scores[0]} \n"
+              f"Player 2 score: {self.player_scores[1]} \n")
 
     def player_move(self, player):
         dice_roll = random.randint(1, 6)
@@ -73,9 +93,9 @@ class Game:
             self.player_move(self.turn)
 
         # winner check
-        if self.player1_score > self.player2_score:
+        if self.player_scores[0] > self.player_scores[1]:
             print("Player 1 wins!")
-        elif self.player2_score > self.player1_score:
+        elif self.player_scores[1] > self.player_scores[0]:
             print("Player 2 wins!")
         else:
             print("It's a tie!")
